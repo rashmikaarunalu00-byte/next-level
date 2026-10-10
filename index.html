@@ -12,6 +12,7 @@
 <title>Next Level Fitness Tracker</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <!-- Register Service Worker for PWA Offline Support -->
@@ -150,7 +151,7 @@ input[type=date],input[type=month]{color-scheme:dark}
         <div class="flex-1"><div class="bar"><i id="tBar" style="width:0"></i></div></div>
         <button class="btn" onclick="stopTimer()">Stop</button>
       </div>
-      <div class="flex gap-2 mt-3 flex-wrap"><button class="btn c" onclick="startTimer(60)">60s</button><button class="btn c" onclick="startTimer(90)">90s</button><button class="btn c" onclick="startTimer(120)">120s</button></div>
+      <div class="flex gap-2 mt-3 flex-wrap"><button class="btn c" onclick="startTimer(30)">30s</button><button class="btn c" onclick="startTimer(45)">45s</button><button class="btn c" onclick="startTimer(60)">60s</button><button class="btn c" onclick="startTimer(90)">90s</button><button class="btn c" onclick="startTimer(120)">120s</button><button class="btn c" onclick="startTimer(180)">180s</button></div>
     </div>
 
     <div class="card mt-3">
@@ -163,6 +164,9 @@ input[type=date],input[type=month]{color-scheme:dark}
       <div class="lbl mb-2">Routines</div>
       <div class="flex gap-2"><select id="routineSel"></select><button class="btn p" onclick="loadRoutine()">Load</button></div>
       <div class="lbl mt-4 mb-2">Add exercise</div>
+      <input id="exSearch" type="search" placeholder="Search exercises…" autocomplete="off" maxlength="40" aria-label="Search exercises" oninput="filterEx()" class="mb-2">
+      <div id="exFilters" class="flex gap-2 flex-wrap mb-2" role="group" aria-label="Filter by muscle group"><button type="button" class="btn on" data-g="All" onclick="setExGrp('All')" style="padding:6px 12px;font-size:12px">All</button><button type="button" class="btn" data-g="Chest" onclick="setExGrp('Chest')" style="padding:6px 12px;font-size:12px">Chest</button><button type="button" class="btn" data-g="Back" onclick="setExGrp('Back')" style="padding:6px 12px;font-size:12px">Back</button><button type="button" class="btn" data-g="Legs" onclick="setExGrp('Legs')" style="padding:6px 12px;font-size:12px">Legs</button><button type="button" class="btn" data-g="Shoulders" onclick="setExGrp('Shoulders')" style="padding:6px 12px;font-size:12px">Shoulders</button><button type="button" class="btn" data-g="Arms" onclick="setExGrp('Arms')" style="padding:6px 12px;font-size:12px">Arms</button><button type="button" class="btn" data-g="Core" onclick="setExGrp('Core')" style="padding:6px 12px;font-size:12px">Core</button></div>
+      <div class="text-xs mb-2" id="exCount" style="color:var(--mut)"></div>
       <div class="flex gap-2"><select id="exSel"></select><button class="btn" onclick="addEx($('#exSel').value)">Add</button></div>
       <div class="grid grid-cols-[1fr_110px_auto] gap-2 mt-2"><input id="cName" placeholder="Custom exercise name"><select id="cGrp"><option>Chest</option><option>Back</option><option>Legs</option><option>Shoulders</option><option>Arms</option><option>Core</option><option>Glutes</option><option>Cardio</option><option>Full Body</option></select><button class="btn c" onclick="addCustom()">Create</button></div>
       <div id="cList" class="flex gap-2 flex-wrap mt-3"></div>
@@ -515,14 +519,30 @@ function renderDash(){
 }
 
 /* ---------- Logger ---------- */
+/* ---------- Exercise search + muscle-group filter ---------- */
+let exGrp='All';
+const exGroup=n=>EX[n]||(S.custom.find(c=>c.n===n)||{}).g||'';
+function setExGrp(g){
+  exGrp=g;
+  document.querySelectorAll('#exFilters button').forEach(b=>b.classList.toggle('on',b.dataset.g===g));
+  filterEx();
+}
+function filterEx(){
+  const sel=$('#exSel');if(!sel)return;
+  const q=(($('#exSearch')||{}).value||'').trim().toLowerCase(),keep=sel.value;
+  const list=allEx().filter(n=>(exGrp==='All'||exGroup(n)===exGrp)&&(!q||n.toLowerCase().includes(q)));
+  sel.innerHTML=list.length?list.map(n=>`<option>${n}</option>`).join(''):'<option value="">No exercises found</option>';
+  if(list.includes(keep))sel.value=keep;
+  const c=$('#exCount');if(c)c.textContent=list.length+(list.length===1?' exercise':' exercises')+(exGrp!=='All'||q?' found':'');
+}
 function fillSelects(){
  $('#routineSel').innerHTML=Object.keys(R).map(r=>`<option>${r}</option>`).join('');
- const keep=$('#exSel').value;$('#exSel').innerHTML=allEx().map(n=>`<option>${n}</option>`).join('');if(allEx().includes(keep))$('#exSel').value=keep;
+ filterEx();
  $('#cList').innerHTML=S.custom.length?`<div class="w-full lbl" style="text-transform:none">Your exercises · swipe left to remove</div>`+S.custom.map((c,i)=>`<div class="swp" data-i="${i}"><div class="swp-bg">Delete</div><div class="swp-fg"><span>${c.n} <span class="lbl">${c.g}</span></span><button aria-label="Remove ${c.n}" onclick="delCustom(${i})">×</button></div></div>`).join(''):'';
 }
 function lastSession(n){const l=[...S.workouts].filter(w=>w.date<today()).sort((a,b)=>b.date<a.date?-1:1);for(const w of l){const e=w.ex.find(x=>x.n===n);if(e)return e}return null}
 function addEx(n){if(!n)return;const p=lastSession(n);const sets=p?p.sets.map(s=>({w:s.w,r:s.r,d:0})):[0,1,2].map(()=>({w:0,r:0,d:0}));S.draft.push({n,sets});save();renderLog()}
-function addCustom(){const n=$('#cName').value.replace(/[<>&"'`]/g,'').trim().slice(0,40);if(!n)return toast('Enter a name');if(allEx().includes(n)){$('#exSel').value=n;return toast('Exercise already exists')}S.custom.push({n,g:$('#cGrp').value});$('#cName').value='';fillSelects();$('#exSel').value=n;save();toast('Saved to your exercise library')}
+function addCustom(){if($('#exSearch'))$('#exSearch').value='';setExGrp('All');const n=$('#cName').value.replace(/[<>&"'`]/g,'').trim().slice(0,40);if(!n)return toast('Enter a name');if(allEx().includes(n)){$('#exSel').value=n;return toast('Exercise already exists')}S.custom.push({n,g:$('#cGrp').value});$('#cName').value='';fillSelects();$('#exSel').value=n;save();toast('Saved to your exercise library')}
 function delCustom(i){S.custom.splice(i,1);save();fillSelects()}
 /* swipe-left to remove a custom exercise (touch + mouse) */
 (function(){let st=null;
@@ -744,7 +764,7 @@ const BD=[['c100','100kg Club','💯',()=>S.workouts.some(w=>w.ex.some(e=>e.sets
 function newBadges(){const n=BD.filter(b=>!S.badges.includes(b[0])&&b[3]());n.forEach(b=>S.badges.push(b[0]));save();return n}
 function celebrate(prs,bs){if(!prs.length&&!bs.length)return;
  $('#mBox').innerHTML=`<div style="font-size:54px">${prs.length?'🏆':'🎖️'}</div><div class="big gold">${prs.length?'PR Unlocked!':'Badge Unlocked!'}</div>`+prs.map(p=>`<div class="chip g mt-3" style="justify-content:center">${p.n}: ${fmt(p.w)} ${S.unit} × ${p.r}</div>`).join('')+bs.map(b=>`<div class="badge u mt-3"><div style="font-size:34px">${b[2]}</div><b class="gold">${b[1]}</b></div>`).join('')+`<button class="btn p mt-4" onclick="$('#modal').classList.remove('show')">Awesome!</button>`;
- $('#modal').classList.add('show');if(prs.length)say('New personal record! Great work!');renderAwd()}
+ $('#modal').classList.add('show');if(prs.length){say('New personal record! Great work!');try{if(typeof confetti==='function')confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } })}catch(e){}}renderAwd()}
 function renderAwd(){
  $('#badges').innerHTML=BD.map(b=>{const u=S.badges.includes(b[0]);return `<div class="badge ${u?'u':''}"><div style="font-size:30px">${b[2]}</div><div class="text-xs font-bold ${u?'gold':''}">${b[1]}</div></div>`}).join('');
  const pr=Object.entries(S.prs).sort((a,b)=>b[1].b-a[1].b);

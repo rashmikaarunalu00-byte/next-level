@@ -42,6 +42,31 @@ nav button.act{color:var(--g);background:rgba(0,255,102,.1)}
 .setrow{display:grid;grid-template-columns:24px 1fr 1fr 36px 32px;gap:8px;align-items:center;margin-top:8px}
 .ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .bar{height:8px;border-radius:99px;background:#0E131D;overflow:hidden}.bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--e),var(--g));transition:width .5s}
+#netbar{position:fixed;left:0;right:0;bottom:calc(66px + env(safe-area-inset-bottom,0px));z-index:40;display:flex;justify-content:center;pointer-events:none;transform:translateY(140%);opacity:0;transition:transform .35s ease,opacity .35s ease}
+#netbar.show{transform:none;opacity:1}
+#netbar span{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:999px;font-size:13px;font-weight:700;background:#FF4D4D;color:#fff;box-shadow:0 4px 18px rgba(255,77,77,.4)}
+#netbar.ok span{background:var(--g);color:#04120A;box-shadow:0 4px 18px rgba(0,255,102,.35)}
+#netbar i{width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block}
+#netbar:not(.ok) i{animation:netp 1.2s infinite}
+@keyframes netp{50%{opacity:.25}}
+#tour{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:20px}
+#tour.show{display:flex;animation:fade .35s ease}
+#tour .tbox{width:100%;max-width:400px;max-height:90vh;overflow:auto;background:rgba(11,15,23,.95);border:1px solid rgba(0,255,102,.35);border-radius:24px;padding:18px 18px 20px;box-shadow:0 0 40px rgba(0,255,102,.12),0 0 60px rgba(0,229,255,.08);animation:pop .5s cubic-bezier(.2,1.4,.4,1)}
+#tour .ttop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#tour .tstep{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--c)}
+#tour .tskip{background:rgba(255,77,77,.12);color:#FF8A8A;border:1px solid rgba(255,77,77,.4);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:800;cursor:pointer;transition:.2s}
+#tour .tskip:hover{background:rgba(255,77,77,.22)}
+#tour .tbar{height:4px;border-radius:99px;background:#0E131D;overflow:hidden;margin:14px 0 4px}
+#tour .tbar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--c),var(--g));transition:width .35s}
+#tour .tbody{text-align:center;padding:18px 4px 8px;animation:fade .3s ease}
+#tour .temo{font-size:56px;line-height:1;filter:drop-shadow(0 0 16px rgba(0,255,102,.35))}
+#tour .ttitle{font-size:22px;font-weight:800;margin-top:14px;color:var(--g)}
+#tour .tdesc{font-size:14px;line-height:1.65;color:var(--tx);opacity:.88;margin-top:8px}
+#tour .tdots{display:flex;justify-content:center;gap:6px;margin:14px 0 4px}
+#tour .tdots b{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.18);transition:.25s}
+#tour .tdots b.on{background:var(--g);box-shadow:0 0 8px rgba(0,255,102,.6);width:20px;border-radius:99px}
+#tour .tnav{display:flex;gap:10px;margin-top:16px}
+#tour .tnav .btn{flex:1;justify-content:center;padding:12px 16px;font-size:14px}
 .toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--g);color:#04120A;font-weight:700;padding:10px 18px;border-radius:999px;z-index:50;font-size:13px;animation:fade .3s}
 nav button{font-size:10px}.gold{color:#FFD700}
 nav div{overflow-x:auto;scrollbar-width:none}nav div::-webkit-scrollbar{display:none}nav button{min-width:52px}
@@ -249,7 +274,17 @@ input[type=date],input[type=month]{color-scheme:dark}
   </div>
 </div>
 <div id="onb" style="position:fixed;inset:0;z-index:70;background:rgba(11,15,23,.96);display:none;align-items:center;justify-content:center;padding:20px"><div class="card" style="max-width:380px;width:100%;max-height:92vh;overflow:auto;animation:pop .5s cubic-bezier(.2,1.4,.4,1)"><div class="big">Your profile</div><p class="text-sm mb-4" style="color:var(--mut)">Update your details or back up your training data.</p><input id="uName" placeholder="Full name" class="mb-2"><input id="uPhone" type="tel" inputmode="tel" placeholder="Phone number" class="mb-2"><div class="lbl mb-1">Birthday</div><input id="uBday" type="date" class="mb-4"><button class="btn p justify-center" style="width:100%;padding:13px" onclick="saveProfile()">Save &amp; Continue</button><button class="btn justify-center mt-2" id="uCancel" style="width:100%;display:none" onclick="$('#onb').style.display='none'">Cancel</button><div style="border-top:1px solid var(--bd);margin-top:18px;padding-top:14px"><div class="lbl mb-2">Data backup</div><div class="flex gap-2"><button class="btn c justify-center" style="flex:1" onclick="backupData()">⬇ Download</button><button class="btn justify-center" style="flex:1" onclick="$('#restoreFile').click()">⬆ Restore</button></div><input type="file" id="restoreFile" accept=".json,application/json" style="display:none" onchange="restoreData(this)"><div class="text-xs mt-2" id="bkInfo" style="color:var(--mut)"></div></div></div></div>
+<div id="tour" role="dialog" aria-modal="true" aria-labelledby="tourTitle">
+  <div class="tbox">
+    <div class="ttop"><span class="tstep" id="tourStep">Step 1 of 5</span><button type="button" class="tskip" onclick="endTour()">Skip Guide ✕</button></div>
+    <div class="tbar"><i id="tourBar" style="width:20%"></i></div>
+    <div class="tbody" id="tourBody"><div class="temo" id="tourEmo"></div><div class="ttitle" id="tourTitle"></div><div class="tdesc" id="tourDesc"></div></div>
+    <div class="tdots" id="tourDots"></div>
+    <div class="tnav"><button type="button" class="btn" id="tourBack" onclick="tourGo(-1)">Back</button><button type="button" class="btn p" id="tourNext" onclick="tourGo(1)">Next</button></div>
+  </div>
+</div>
 <nav><div id="navs"></div></nav>
+<div id="netbar" role="status" aria-live="polite"><span><i></i><b id="netTxt">Not connected</b></span></div>
 
 <script>
 const $=s=>document.querySelector(s);
@@ -962,6 +997,105 @@ else{const a=ACC[SES.id];let u=getUser();
  try{const w=sessionStorage.getItem('nl_welcome');if(w){sessionStorage.removeItem('nl_welcome');const n1=S.workouts.length,n2=S.body.length;
   setTimeout(()=>toast((w==='signup'?'Account ready':'Welcome back, '+a.name.split(' ')[0])+(n1||n2?' · restored '+n1+' workout'+(n1===1?'':'s')+', '+n2+' body log'+(n2===1?'':'s'):'')),400)}}catch(e){}}
 try{const m=sessionStorage.getItem('nl_msg');if(m){sessionStorage.removeItem('nl_msg');setTimeout(()=>toast(m),600)}}catch(e){}
+/* ---------- First-time user onboarding tour ---------- */
+const TOUR_KEY='nextlevel_tour_done';
+const TOUR=[
+ {e:'🏠',t:'Your Overview',d:'The Home tab shows your week at a glance: total volume, sets, reps, your best estimated 1RM and which muscle groups you have trained the most.',tab:'dash'},
+ {e:'🏋️',t:'Workout Logger',d:'Open the Log tab to add exercises and record every set with weight and reps. Use the built-in rest timer between sets. Your workouts are saved on this device and appear in History.',tab:'log'},
+ {e:'🥗',t:'Fuel & Nutrition',d:'Pick your goal in the Fuel tab to get daily calorie and macro targets. Log your meals and track your water intake to stay on plan.',tab:'nut'},
+ {e:'🤖',t:'AI Recovery Assistant',d:'The AI tab gives you a recovery score and real-time tips based on your recent training, so you know when to push hard and when to rest.',tab:'ai'},
+ {e:'🏆',t:'Badges & PRs',d:'Unlock badges as you stay consistent, track your personal records, and export a weekly or monthly share card as an image or PDF.',tab:'awd'}
+];
+let tourI=0;
+function tourDone(){try{return localStorage.getItem(TOUR_KEY)==='true'}catch(e){return false}}
+function tourRender(){
+  const st=TOUR[tourI],n=TOUR.length;
+  $('#tourStep').textContent='Step '+(tourI+1)+' of '+n;
+  $('#tourBar').style.width=((tourI+1)/n*100)+'%';
+  $('#tourEmo').textContent=st.e;$('#tourTitle').textContent=st.t;$('#tourDesc').textContent=st.d;
+  const b=$('#tourBody');b.style.animation='none';void b.offsetWidth;b.style.animation='';
+  $('#tourDots').innerHTML=TOUR.map((_,i)=>'<b class="'+(i===tourI?'on':'')+'"></b>').join('');
+  $('#tourBack').style.visibility=tourI===0?'hidden':'visible';
+  $('#tourNext').textContent=tourI===n-1?'Get Started! 🚀':'Next';
+  try{go(st.tab)}catch(e){} /* show the matching tab behind the guide */
+}
+function tourGo(d){
+  if(d>0&&tourI===TOUR.length-1)return endTour();
+  tourI=Math.max(0,Math.min(TOUR.length-1,tourI+d));tourRender();
+}
+function endTour(){
+  try{localStorage.setItem(TOUR_KEY,'true')}catch(e){}
+  $('#tour').classList.remove('show');
+  document.removeEventListener('keydown',tourKeys);
+  if(!document.querySelector('#auth')||getComputedStyle($('#auth')).display==='none')document.body.style.overflow='';
+  try{go('dash')}catch(e){}
+}
+function tourKeys(e){
+  if(e.key==='Escape')endTour();
+  else if(e.key==='ArrowRight')tourGo(1);
+  else if(e.key==='ArrowLeft'&&tourI>0)tourGo(-1);
+}
+function showTour(){
+  tourI=0;tourRender();
+  $('#tour').classList.add('show');document.body.style.overflow='hidden';
+  document.addEventListener('keydown',tourKeys);
+}
+/* wait 1s after load; if the sign-in or profile screen is open, wait until it is closed */
+function tourTry(){
+  if(tourDone())return;
+  const open=id=>{const el=document.getElementById(id);return el&&getComputedStyle(el).display!=='none'};
+  if(open('auth')||open('onb'))return setTimeout(tourTry,1000);
+  showTour();
+}
+if(!tourDone())window.addEventListener('load',()=>setTimeout(tourTry,1000));
+
+/* ---------- Live internet connection indicator ---------- */
+(function(){
+  const bar=document.getElementById('netbar'),txt=document.getElementById('netTxt');
+  let online=true,hideT=null,busy=false;
+  function show(ok){
+    clearTimeout(hideT);
+    bar.classList.toggle('ok',ok);
+    txt.textContent=ok?'Back online':'Not connected';
+    bar.classList.add('show');
+    if(ok)hideT=setTimeout(()=>bar.classList.remove('show'),2500);
+  }
+  function set(v){
+    if(v===online)return;
+    online=v;show(v);
+    if(v&&typeof flushSync==='function'){try{flushSync()}catch(e){}}
+  }
+  /* navigator.onLine can say true on wifi with no internet, so confirm with a tiny real request.
+     Several hosts are tried at the same time and ONE success = online, so a single blocked host never shows a false "Not connected". */
+  const PINGS=[
+    'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/package.json', /* already used by this app */
+    'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
+    'https://www.gstatic.com/generate_204',
+    'https://www.cloudflare.com/cdn-cgi/trace'
+  ];
+  function probe(u){
+    return new Promise((res,rej)=>{
+      const c=new AbortController(),t=setTimeout(()=>{c.abort();rej(new Error('timeout'))},6000);
+      fetch(u+(u.includes('?')?'&':'?')+'_='+Date.now(),{method:'GET',mode:'no-cors',cache:'no-store',signal:c.signal})
+        .then(()=>{clearTimeout(t);res(true)},e=>{clearTimeout(t);rej(e)});
+    });
+  }
+  function anyOk(list){ /* Promise.any fallback for older browsers */
+    return new Promise(res=>{let n=list.length;list.forEach(p=>p.then(()=>res(true),()=>{if(--n===0)res(false)}))});
+  }
+  async function ping(){
+    if(busy)return;busy=true;
+    if(navigator.onLine===false){busy=false;return set(false)}
+    const ok=await anyOk(PINGS.map(probe));
+    set(ok);busy=false;
+  }
+  window.addEventListener('offline',()=>set(false));
+  window.addEventListener('online',ping);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)ping()});
+  setInterval(()=>{if(!document.hidden)ping()},15000);
+  if(navigator.onLine===false){online=true;set(false)}else ping();
+})();
+
 window.addEventListener('load',renderDash);
 </script>
 </body>

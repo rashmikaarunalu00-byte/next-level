@@ -12,6 +12,16 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Register Service Worker for PWA Offline Support -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('SW Registered!', reg))
+          .catch(err => console.log('SW Error:', err));
+      });
+    }
+  </script>
 <style>
 :root{box-sizing:border-box;--bg:#0B0F17;--card:#161C28;--g:#00FF66;--c:#00E5FF;--e:#00C853;--tx:#E8EEF7;--mut:#7F8BA3;--bd:rgba(255,255,255,.07);padding-top:env(safe-area-inset-top,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}

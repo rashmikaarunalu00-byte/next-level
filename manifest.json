@@ -1,15 +1,16 @@
 {
   "name": "Next Level Fitness Tracker",
-  "short_name": "Next Level",
-  "start_url": "index.html",
+  "short_name": "NextLevel",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0B0F17",
-  "theme_color": "#00FF66",
+  "theme_color": "#0B0F17",
   "icons": [
     {
       "src": "my_icon.jpg",
-      "sizes": "192x192",
-      "type": "image/jpeg"
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
     }
   ]
 }

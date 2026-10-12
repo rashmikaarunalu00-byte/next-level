@@ -134,7 +134,7 @@ input[type=date],input[type=month]{color-scheme:dark}
     <!-- Home Tab Banner -->
     <div class="card mb-3 overflow-hidden p-0 relative" style="border-radius: 20px;">
 <img src="eat.jpg" alt="Fitness Healthy Meal Banner" style="width: 100%; height: 180px; object-fit: cover; display: block; cursor: pointer;" onclick="goToFuelAndOrder()">
-      <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,15,23,0.1) 0%, rgba(11,15,23,0.85) 100%); display: flex; flex-direction: column; justify-content: flex-end; padding: 16px;">
+      <div style="pointer-events: none; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,15,23,0.1) 0%, rgba(11,15,23,0.85) 100%); display: flex; flex-direction: column; justify-content: flex-end; padding: 16px;">
         <div style="color: var(--g); font-weight: 800; font-size: 18px;">Fuel Your Body</div>
         <div style="color: var(--tx); font-size: 12px; opacity: 0.9;">Eat right, train smart & track your progress</div>
       </div>
@@ -271,7 +271,14 @@ input[type=date],input[type=month]{color-scheme:dark}
     <div class="card"><div class="flex items-center gap-4"><div style="width:130px;height:130px"><canvas id="mChart"></canvas></div><div class="flex-1 text-sm" id="mTot"></div></div><div id="mBars" class="mt-3 space-y-2"></div><div class="mt-3 space-y-2" id="mAI"></div></div>
     <div class="card mt-3"><div class="lbl mb-2">Log meal</div><input id="mn" placeholder="Meal name" class="mb-2"><div class="grid grid-cols-4 gap-2"><input id="mk" type="number" placeholder="kcal"><input id="mp" type="number" placeholder="P g"><input id="mc" type="number" placeholder="C g"><input id="mf" type="number" placeholder="F g"></div><button class="btn p mt-3" onclick="addMeal()">Add meal</button><div id="mList" class="mt-3 space-y-2 text-sm"></div></div>
       <!-- WhatsApp Order Button -->
-<div class="card bg-gradient-to-r from-emerald-900/40 to-emerald-950/40 border-emerald-500/30 mt-4 p-4 rounded-2xl text-center">
+<div id="orderCard" class="card bg-gradient-to-r from-emerald-900/40 to-emerald-950/40 border-emerald-500/30 mt-4 p-4 rounded-2xl text-center">
+  <div style="position:relative;border-radius:14px;overflow:hidden;margin-bottom:12px;text-align:left">
+    <img src="eat.jpg" alt="Fitness Healthy Meal Banner" style="width:100%;height:150px;object-fit:cover;display:block">
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,15,23,0.1) 0%,rgba(11,15,23,0.85) 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:12px">
+      <div style="color:var(--g);font-weight:800;font-size:16px">Fuel Your Body</div>
+      <div style="color:#E8EEF7;font-size:12px;opacity:.9">Eat right, train smart &amp; track your progress</div>
+    </div>
+  </div>
   <p class="text-xs text-gray-300 mb-2 font-medium">Need customized healthy meal plans delivered?</p>
   <a href="https://wa.me/94781060275?text=Hello!%20I%20would%20like%20to%20order%20a%20healthy%20meal%20plan%20from%20Next%20Level%20Fitness." 
      target="_blank" 
@@ -1312,27 +1319,18 @@ if(!tourDone())window.addEventListener('load',()=>setTimeout(tourTry,1000));
 
 window.addEventListener('load',renderDash);
     function goToFuelAndOrder() {
-  // 1. Fuel Tab එකට Switch වීම
-  if (typeof switchTab === 'function') {
-    switchTab('fuel');
-  } else if (typeof showTab === 'function') {
-    showTab('fuel');
-  } else {
-    // නැත්නම් direct tab button click කිරීම
-    const fuelBtn = document.querySelector('button[onclick*="fuel"]');
-    if (fuelBtn) fuelBtn.click();
-  }
+  // 1. Switch to the Fuel tab (tab key is 'nut')
+  go('nut');
 
-  // 2. Log Meal Section එකට Smooth Scroll වීම
+  // 2. Smooth scroll to the Order Meal Plan card
   setTimeout(() => {
-    const logMealSec = document.getElementById('logMealSection') || document.querySelector('.card.mt-3');
-    if (logMealSec) {
-      logMealSec.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      // පොඩි highlight effect එකක්
-      logMealSec.classList.add('ring-2', 'ring-emerald-400');
-      setTimeout(() => logMealSec.classList.remove('ring-2', 'ring-emerald-400'), 2000);
+    const sec = document.getElementById('orderCard');
+    if (sec) {
+      sec.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      sec.classList.add('ring-2', 'ring-emerald-400');
+      setTimeout(() => sec.classList.remove('ring-2', 'ring-emerald-400'), 2000);
     }
-  }, 200);
+  }, 400);
 }
 </script>
 </body>

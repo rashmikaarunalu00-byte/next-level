@@ -2,7 +2,8 @@ const CACHE_NAME = 'next-level-v1';
 const ASSETS = [
   './index.html',
   './manifest.json',
-  './my_icon.jpg'
+  './my_icon.jpg',
+  './eat.jpg'
 ];
 
 // Install Event - Caching core assets

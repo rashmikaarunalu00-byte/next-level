@@ -1311,6 +1311,29 @@ if(!tourDone())window.addEventListener('load',()=>setTimeout(tourTry,1000));
 })();
 
 window.addEventListener('load',renderDash);
+    function goToFuelAndOrder() {
+  // 1. Fuel Tab එකට Switch වීම
+  if (typeof switchTab === 'function') {
+    switchTab('fuel');
+  } else if (typeof showTab === 'function') {
+    showTab('fuel');
+  } else {
+    // නැත්නම් direct tab button click කිරීම
+    const fuelBtn = document.querySelector('button[onclick*="fuel"]');
+    if (fuelBtn) fuelBtn.click();
+  }
+
+  // 2. Log Meal Section එකට Smooth Scroll වීම
+  setTimeout(() => {
+    const logMealSec = document.getElementById('logMealSection') || document.querySelector('.card.mt-3');
+    if (logMealSec) {
+      logMealSec.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // පොඩි highlight effect එකක්
+      logMealSec.classList.add('ring-2', 'ring-emerald-400');
+      setTimeout(() => logMealSec.classList.remove('ring-2', 'ring-emerald-400'), 2000);
+    }
+  }, 200);
+}
 </script>
 </body>
 </html>

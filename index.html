@@ -280,10 +280,11 @@ input[type=date],input[type=month]{color-scheme:dark}
     </div>
   </div>
   <p class="text-xs text-gray-300 mb-2 font-medium">Need customized healthy meal plans delivered?</p>
-  <button onclick="orderMealPlan()" 
-   class="btn p w-full justify-center text-center py-3 text-sm font-bold flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-black rounded-full shadow-lg cursor-pointer">
-  📲 Order Meal Plan via WhatsApp
-</button>
+  <a href="https://wa.me/94781060275?text=Hello!%20I%20would%20like%20to%20order%20a%20healthy%20meal%20plan%20from%20Next%20Level%20Fitness." 
+     target="_blank" 
+     class="btn p w-full justify-center text-center py-3 text-sm font-bold flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-black rounded-full shadow-lg">
+    📲 Order Meal Plan via WhatsApp
+  </a>
 </div>
     <div class="card mt-3"><div class="flex justify-between"><div class="font-bold">Hydration</div><div class="text-sm" id="wTxt" style="color:var(--c)"></div></div><div class="bar mt-3"><i id="wBar" style="width:0;background:linear-gradient(90deg,#0091B3,var(--c))"></i></div><div class="text-xs mt-2" id="wHint" style="color:var(--mut)"></div><div id="wGl" class="flex gap-1 mt-3 text-2xl flex-wrap"></div><div class="flex gap-2 mt-3"><button class="btn c" onclick="addW(1)">+250ml</button><button class="btn c" onclick="addW(2)">+500ml</button><button class="btn" onclick="addW(-1)">−250ml</button></div></div>
   </section>
@@ -587,27 +588,15 @@ function renderDash(){
  S.workouts.filter(w=>pd(w.date)>cut).forEach(w=>w.ex.forEach(e=>g[grp(e.n)]=(g[grp(e.n)]||0)+e.sets.length));
  const ent=Object.entries(g).sort((a,b)=>b[1]-a[1]),mx=ent.length?ent[0][1]:1;
  $('#mFocus').innerHTML=ent.length?ent.slice(0,4).map(([k,n])=>`<div><div class="flex justify-between text-xs mb-1"><span>${k}</span><span style="color:var(--mut)">${n} sets</span></div><div class="bar"><i style="width:${n/mx*100}%"></i></div></div>`).join(''):'<div class="text-sm" style="color:var(--mut)">No workouts logged yet.</div>';
-const labels=[],vol=[],str=[];
-  for(let i=6;i>=0;i--){
-    const d=new Date();
-    d.setDate(d.getDate()-i);
-    d.setHours(0,0,0,0);
-    const nextD=new Date(d);
-    nextD.setDate(nextD.getDate()+1);
-    
-    const dayWorkouts=S.workouts.filter(w=>{const dt=pd(w.date);return dt>=d && dt<nextD;});
-    
-    labels.push(d.toLocaleDateString(undefined,{month:'short',day:'numeric'}));
-    
-    const dayVol=dayWorkouts.reduce((a,w)=>a+w.ex.reduce((b,e)=>b+volOf(e),0),0);
-    vol.push(Math.round(toU(dayVol)));
-    
-    let m=0;
-    dayWorkouts.forEach(x=>x.ex.forEach(e=>e.sets.forEach(s=>m=Math.max(m,e1(s.w,s.r)))));
-    str.push(m?Math.round(toU(m)):null);
-  }
-  const tick={color:cssv('--mut')},grid={color:cssv('--grid')};
-  if(chart){chart.data=data;chart.update()}else if(window.Chart)chart=new Chart($('#chart'),{type:'bar',data,options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:cssv('--lg'),usePointStyle:true}}},scales:{x:{ticks:tick,grid:{display:false}},y:{ticks:tick,grid,beginAtZero:true},y1:{position:'right',ticks:{color:'#00E5FF'},grid:{display:false}}}}});
+ const labels=[],vol=[],str=[];
+ for(let i=5;i>=0;i--){const M=cp==='m',N=new Date(),a=M?new Date(N.getFullYear(),N.getMonth()-i,1):new Date(ws),b=M?new Date(N.getFullYear(),N.getMonth()-i+1,1):new Date(ws);if(!M){a.setDate(a.getDate()-i*7);b.setDate(b.getDate()-i*7+7)}const w=inRange(a,b);
+  labels.push(a.toLocaleDateString(undefined,M?{month:'short'}:{month:'short',day:'numeric'}));vol.push(Math.round(toU(sum(w,volOf))));
+  let m=0;w.forEach(x=>x.ex.forEach(e=>e.sets.forEach(s=>m=Math.max(m,e1(s.w,s.r)))));str.push(m?Math.round(toU(m)):null)}
+ const data={labels,datasets:[{type:'bar',label:'Volume ('+S.unit+')',data:vol,backgroundColor:'rgba(0,255,102,.55)',borderColor:'#00FF66',borderWidth:1,borderRadius:8,yAxisID:'y'},{type:'line',label:'Best est. 1RM ('+S.unit+')',data:str,borderColor:'#00E5FF',backgroundColor:'#00E5FF',tension:.4,pointRadius:4,spanGaps:true,yAxisID:'y1'}]};
+ const tick={color:cssv('--mut')},grid={color:cssv('--grid')};
+ if(chart){chart.data=data;chart.update()}else if(window.Chart)chart=new Chart($('#chart'),{type:'bar',data,options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:cssv('--lg'),usePointStyle:true}}},scales:{x:{ticks:tick,grid:{display:false}},y:{ticks:tick,grid,beginAtZero:true},y1:{position:'right',ticks:{color:'#00E5FF'},grid:{display:false}}}}});
+}
+
 /* ---------- Logger ---------- */
 /* ---------- Exercise search + muscle-group filter ---------- */
 let exGrp='All';
@@ -1329,33 +1318,6 @@ if(!tourDone())window.addEventListener('load',()=>setTimeout(tourTry,1000));
 })();
 
 window.addEventListener('load',renderDash);
-    async function orderMealPlan() {
-  const u = getUser() || {};
-  const orderData = {
-    event: 'meal_plan_order',
-    name: u.name || 'Guest User',
-    phone: u.phone || '',
-    email: u.email || '',
-    goal: (S.nut && S.nut.goal) ? S.nut.goal : 'Not set',
-    weight: wtKg() ? wtKg() + ' kg' : 'Not set',
-    timestamp: new Date().toISOString()
-  };
-
-  try {
-    await sheetCall(orderData, { blind: true });
-  } catch (e) {
-    console.log("Sheet update log failed", e);
-  }
-
-  const waUrl = "https://wa.me/94781060275?text=" + encodeURIComponent(
-    `Hello! I would like to order a healthy meal plan from Next Level Fitness.\n\n` +
-    `Name: ${orderData.name}\n` +
-    `Goal: ${orderData.goal}\n` +
-    `Weight: ${orderData.weight}`
-  );
-  
-  window.open(waUrl, '_blank');
-}
     function goToFuelAndOrder() {
   // 1. Switch to the Fuel tab (tab key is 'nut')
   go('nut');

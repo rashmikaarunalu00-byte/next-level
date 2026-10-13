@@ -280,11 +280,10 @@ input[type=date],input[type=month]{color-scheme:dark}
     </div>
   </div>
   <p class="text-xs text-gray-300 mb-2 font-medium">Need customized healthy meal plans delivered?</p>
-  <a href="https://wa.me/94781060275?text=Hello!%20I%20would%20like%20to%20order%20a%20healthy%20meal%20plan%20from%20Next%20Level%20Fitness." 
-     target="_blank" 
-     class="btn p w-full justify-center text-center py-3 text-sm font-bold flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-black rounded-full shadow-lg">
-    📲 Order Meal Plan via WhatsApp
-  </a>
+  <button onclick="orderMealPlan()" 
+   class="btn p w-full justify-center text-center py-3 text-sm font-bold flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-black rounded-full shadow-lg cursor-pointer">
+  📲 Order Meal Plan via WhatsApp
+</button>
 </div>
     <div class="card mt-3"><div class="flex justify-between"><div class="font-bold">Hydration</div><div class="text-sm" id="wTxt" style="color:var(--c)"></div></div><div class="bar mt-3"><i id="wBar" style="width:0;background:linear-gradient(90deg,#0091B3,var(--c))"></i></div><div class="text-xs mt-2" id="wHint" style="color:var(--mut)"></div><div id="wGl" class="flex gap-1 mt-3 text-2xl flex-wrap"></div><div class="flex gap-2 mt-3"><button class="btn c" onclick="addW(1)">+250ml</button><button class="btn c" onclick="addW(2)">+500ml</button><button class="btn" onclick="addW(-1)">−250ml</button></div></div>
   </section>
@@ -1330,6 +1329,33 @@ if(!tourDone())window.addEventListener('load',()=>setTimeout(tourTry,1000));
 })();
 
 window.addEventListener('load',renderDash);
+    async function orderMealPlan() {
+  const u = getUser() || {};
+  const orderData = {
+    event: 'meal_plan_order',
+    name: u.name || 'Guest User',
+    phone: u.phone || '',
+    email: u.email || '',
+    goal: (S.nut && S.nut.goal) ? S.nut.goal : 'Not set',
+    weight: wtKg() ? wtKg() + ' kg' : 'Not set',
+    timestamp: new Date().toISOString()
+  };
+
+  try {
+    await sheetCall(orderData, { blind: true });
+  } catch (e) {
+    console.log("Sheet update log failed", e);
+  }
+
+  const waUrl = "https://wa.me/94781060275?text=" + encodeURIComponent(
+    `Hello! I would like to order a healthy meal plan from Next Level Fitness.\n\n` +
+    `Name: ${orderData.name}\n` +
+    `Goal: ${orderData.goal}\n` +
+    `Weight: ${orderData.weight}`
+  );
+  
+  window.open(waUrl, '_blank');
+}
     function goToFuelAndOrder() {
   // 1. Switch to the Fuel tab (tab key is 'nut')
   go('nut');

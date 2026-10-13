@@ -146,7 +146,7 @@ input[type=date],input[type=month]{color-scheme:dark}
       <div class="card"><div class="lbl">Est. 1RM (best)</div><div class="big" style="color:var(--c)" id="m1rm"></div><div class="text-xs" id="m1rmN" style="color:var(--mut)"></div></div>
       <div class="card col-span-2 sm:col-span-2"><div class="lbl">Muscle Group Focus (7 days)</div><div id="mFocus" class="mt-2 space-y-2"></div></div>
     </div>
-    <div class="card mt-3"><div class="flex justify-between items-center mb-2"><div class="font-bold">Volume &amp; Strength Trend</div><div class="flex gap-1"><button class="btn on" id="cpW" style="padding:4px 12px;font-size:12px" onclick="setCp('w')">Weekly</button><button class="btn" id="cpM" style="padding:4px 12px;font-size:12px" onclick="setCp('m')">Monthly</button></div></div><div style="height:240px"><canvas id="chart"></canvas></div></div>
+    <div class="card mt-3"><div class="flex justify-between items-center mb-2"><div class="font-bold">Volume &amp; Strength Trend</div><div class="flex gap-1"><button class="btn" id="cpD" style="padding:4px 12px;font-size:12px" onclick="setCp('d')">Daily</button><button class="btn on" id="cpW" style="padding:4px 12px;font-size:12px" onclick="setCp('w')">Weekly</button><button class="btn" id="cpM" style="padding:4px 12px;font-size:12px" onclick="setCp('m')">Monthly</button></div></div><div style="height:240px"><canvas id="chart"></canvas></div></div>
   </section>
 
   <!-- LOGGER -->
@@ -280,7 +280,7 @@ input[type=date],input[type=month]{color-scheme:dark}
     </div>
   </div>
   <p class="text-xs text-gray-300 mb-2 font-medium">Need customized healthy meal plans delivered?</p>
-  <a href="https://wa.me/94781060275?text=Hello!%20I%20would%20like%20to%20order%20a%20healthy%20meal%20plan%20from%20Next%20Level%20Fitness." 
+  <a onclick="logOrder()" href="https://wa.me/94781060275?text=Hello!%20I%20would%20like%20to%20order%20a%20healthy%20meal%20plan%20from%20Next%20Level%20Fitness." 
      target="_blank" 
      class="btn p w-full justify-center text-center py-3 text-sm font-bold flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-black rounded-full shadow-lg">
     📲 Order Meal Plan via WhatsApp
@@ -589,12 +589,12 @@ function renderDash(){
  const ent=Object.entries(g).sort((a,b)=>b[1]-a[1]),mx=ent.length?ent[0][1]:1;
  $('#mFocus').innerHTML=ent.length?ent.slice(0,4).map(([k,n])=>`<div><div class="flex justify-between text-xs mb-1"><span>${k}</span><span style="color:var(--mut)">${n} sets</span></div><div class="bar"><i style="width:${n/mx*100}%"></i></div></div>`).join(''):'<div class="text-sm" style="color:var(--mut)">No workouts logged yet.</div>';
  const labels=[],vol=[],str=[];
- for(let i=5;i>=0;i--){const M=cp==='m',N=new Date(),a=M?new Date(N.getFullYear(),N.getMonth()-i,1):new Date(ws),b=M?new Date(N.getFullYear(),N.getMonth()-i+1,1):new Date(ws);if(!M){a.setDate(a.getDate()-i*7);b.setDate(b.getDate()-i*7+7)}const w=inRange(a,b);
-  labels.push(a.toLocaleDateString(undefined,M?{month:'short'}:{month:'short',day:'numeric'}));vol.push(Math.round(toU(sum(w,volOf))));
+ for(let i=(cp==='d'?6:5);i>=0;i--){const M=cp==='m',D=cp==='d',N=new Date(),a=M?new Date(N.getFullYear(),N.getMonth()-i,1):D?new Date(N.getFullYear(),N.getMonth(),N.getDate()-i):new Date(ws),b=M?new Date(N.getFullYear(),N.getMonth()-i+1,1):D?new Date(N.getFullYear(),N.getMonth(),N.getDate()-i+1):new Date(ws);if(!M&&!D){a.setDate(a.getDate()-i*7);b.setDate(b.getDate()-i*7+7)}const w=inRange(a,b);
+  labels.push(a.toLocaleDateString(undefined,M?{month:'short'}:D?{weekday:'short',day:'numeric'}:{month:'short',day:'numeric'}));vol.push(Math.round(toU(sum(w,volOf))));
   let m=0;w.forEach(x=>x.ex.forEach(e=>e.sets.forEach(s=>m=Math.max(m,e1(s.w,s.r)))));str.push(m?Math.round(toU(m)):null)}
  const data={labels,datasets:[{type:'bar',label:'Volume ('+S.unit+')',data:vol,backgroundColor:'rgba(0,255,102,.55)',borderColor:'#00FF66',borderWidth:1,borderRadius:8,yAxisID:'y'},{type:'line',label:'Best est. 1RM ('+S.unit+')',data:str,borderColor:'#00E5FF',backgroundColor:'#00E5FF',tension:.4,pointRadius:4,spanGaps:true,yAxisID:'y1'}]};
  const tick={color:cssv('--mut')},grid={color:cssv('--grid')};
- if(chart){chart.data=data;chart.update()}else if(window.Chart)chart=new Chart($('#chart'),{type:'bar',data,options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:cssv('--lg'),usePointStyle:true}}},scales:{x:{ticks:tick,grid:{display:false}},y:{ticks:tick,grid,beginAtZero:true},y1:{position:'right',ticks:{color:'#00E5FF'},grid:{display:false}}}}});
+ if(chart){chart.data=data;chart.update();chart.resize()}else if(window.Chart)chart=new Chart($('#chart'),{type:'bar',data,options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:cssv('--lg'),usePointStyle:true}}},scales:{x:{ticks:tick,grid:{display:false}},y:{ticks:tick,grid,beginAtZero:true},y1:{position:'right',ticks:{color:'#00E5FF'},grid:{display:false}}}}});
 }
 
 /* ---------- Logger ---------- */
@@ -1004,7 +1004,7 @@ function renderBody(){
  $('#bLast').innerHTML=l?`Latest <b>${BM[bm]}</b>: <b style="color:var(--g)">${cv(l[bm])} ${u}</b>${rows.length>1?` <span style="color:var(--mut)">(${d>=0?'+':''}${d} since ${f.date})</span>`:''}`:'No data yet.'}
 
 let cp='w',xp='w';
-function setCp(k){cp=k;$('#cpW').classList.toggle('on',k==='w');$('#cpM').classList.toggle('on',k==='m');renderDash()}
+function setCp(k){cp=k;$('#cpD').classList.toggle('on',k==='d');$('#cpW').classList.toggle('on',k==='w');$('#cpM').classList.toggle('on',k==='m');renderDash()}
 function setXp(k){xp=k;$('#xpW').classList.toggle('on',k==='w');$('#xpM').classList.toggle('on',k==='m');renderAwd()}
 /* ---------- History ---------- */
 let delArm=null;
@@ -1318,6 +1318,16 @@ if(!tourDone())window.addEventListener('load',()=>setTimeout(tourTry,1000));
 })();
 
 window.addEventListener('load',renderDash);
+/* Meal-plan order: also record it in the Google Sheet (same script as feedback, so no script change needed) */
+function logOrder(){
+  const a=(SES&&ACC[SES.id])||{},u0=getUser()||{},u={name:u0.name||a.name||'',phone:u0.phone||a.phone||'',email:u0.email||a.email||''};
+  const who=(u.name||'Unknown user')+' | '+(u.phone||u.email||'no contact');
+  const p={event:'feedback',name:u.name,phone:u.phone,email:u.email,id:(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2)),type:'Other',
+    message:'MEAL PLAN ORDER - Name: '+(u.name||'unknown')+(u.phone?' | Phone: '+u.phone:'')+(u.email?' | Email: '+u.email:''),
+    contact:who.slice(0,120),ua:(navigator.userAgent||'').slice(0,160),screen:screen.width+'x'+screen.height,timestamp:new Date().toISOString()};
+  postFeedback(p).catch(()=>{const q=jget(OUTBOX,[]);q.push(p);jset(OUTBOX,q.slice(-50))}); /* offline: saved and re-sent later */
+  toast('Order noted ✅');
+}
     function goToFuelAndOrder() {
   // 1. Switch to the Fuel tab (tab key is 'nut')
   go('nut');

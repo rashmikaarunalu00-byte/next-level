@@ -588,15 +588,27 @@ function renderDash(){
  S.workouts.filter(w=>pd(w.date)>cut).forEach(w=>w.ex.forEach(e=>g[grp(e.n)]=(g[grp(e.n)]||0)+e.sets.length));
  const ent=Object.entries(g).sort((a,b)=>b[1]-a[1]),mx=ent.length?ent[0][1]:1;
  $('#mFocus').innerHTML=ent.length?ent.slice(0,4).map(([k,n])=>`<div><div class="flex justify-between text-xs mb-1"><span>${k}</span><span style="color:var(--mut)">${n} sets</span></div><div class="bar"><i style="width:${n/mx*100}%"></i></div></div>`).join(''):'<div class="text-sm" style="color:var(--mut)">No workouts logged yet.</div>';
- const labels=[],vol=[],str=[];
- for(let i=5;i>=0;i--){const M=cp==='m',N=new Date(),a=M?new Date(N.getFullYear(),N.getMonth()-i,1):new Date(ws),b=M?new Date(N.getFullYear(),N.getMonth()-i+1,1):new Date(ws);if(!M){a.setDate(a.getDate()-i*7);b.setDate(b.getDate()-i*7+7)}const w=inRange(a,b);
-  labels.push(a.toLocaleDateString(undefined,M?{month:'short'}:{month:'short',day:'numeric'}));vol.push(Math.round(toU(sum(w,volOf))));
-  let m=0;w.forEach(x=>x.ex.forEach(e=>e.sets.forEach(s=>m=Math.max(m,e1(s.w,s.r)))));str.push(m?Math.round(toU(m)):null)}
- const data={labels,datasets:[{type:'bar',label:'Volume ('+S.unit+')',data:vol,backgroundColor:'rgba(0,255,102,.55)',borderColor:'#00FF66',borderWidth:1,borderRadius:8,yAxisID:'y'},{type:'line',label:'Best est. 1RM ('+S.unit+')',data:str,borderColor:'#00E5FF',backgroundColor:'#00E5FF',tension:.4,pointRadius:4,spanGaps:true,yAxisID:'y1'}]};
- const tick={color:cssv('--mut')},grid={color:cssv('--grid')};
- if(chart){chart.data=data;chart.update()}else if(window.Chart)chart=new Chart($('#chart'),{type:'bar',data,options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:cssv('--lg'),usePointStyle:true}}},scales:{x:{ticks:tick,grid:{display:false}},y:{ticks:tick,grid,beginAtZero:true},y1:{position:'right',ticks:{color:'#00E5FF'},grid:{display:false}}}}});
-}
-
+const labels=[],vol=[],str=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date();
+    d.setDate(d.getDate()-i);
+    d.setHours(0,0,0,0);
+    const nextD=new Date(d);
+    nextD.setDate(nextD.getDate()+1);
+    
+    const dayWorkouts=S.workouts.filter(w=>{const dt=pd(w.date);return dt>=d && dt<nextD;});
+    
+    labels.push(d.toLocaleDateString(undefined,{month:'short',day:'numeric'}));
+    
+    const dayVol=dayWorkouts.reduce((a,w)=>a+w.ex.reduce((b,e)=>b+volOf(e),0),0);
+    vol.push(Math.round(toU(dayVol)));
+    
+    let m=0;
+    dayWorkouts.forEach(x=>x.ex.forEach(e=>e.sets.forEach(s=>m=Math.max(m,e1(s.w,s.r)))));
+    str.push(m?Math.round(toU(m)):null);
+  }
+  const tick={color:cssv('--mut')},grid={color:cssv('--grid')};
+  if(chart){chart.data=data;chart.update()}else if(window.Chart)chart=new Chart($('#chart'),{type:'bar',data,options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:cssv('--lg'),usePointStyle:true}}},scales:{x:{ticks:tick,grid:{display:false}},y:{ticks:tick,grid,beginAtZero:true},y1:{position:'right',ticks:{color:'#00E5FF'},grid:{display:false}}}}});
 /* ---------- Logger ---------- */
 /* ---------- Exercise search + muscle-group filter ---------- */
 let exGrp='All';
